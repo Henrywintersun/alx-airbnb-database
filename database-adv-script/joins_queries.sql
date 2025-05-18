@@ -61,6 +61,8 @@ SELECT
 FROM 
     bookings
 INNER JOIN users ON bookings.user_id = users.user_id;
+
+
 -- LEFT JOIN: To retrieve all properties and their reviews
 SELECT 
     properties.property_id,
@@ -71,8 +73,10 @@ SELECT
 FROM 
     properties
 LEFT JOIN reviews ON properties.property_id = reviews.property_id;
+
+
+
 -- FULL OUTER JOIN (simulating using UNION in MySQL): To retrieve Users and all bookings
--- LEFT JOIN: Users with bookings
 SELECT 
     users.user_id,
     users.name,
