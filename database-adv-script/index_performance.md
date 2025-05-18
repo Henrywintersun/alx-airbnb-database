@@ -1,78 +1,33 @@
--- Script: database_index.sql
--- Purpose: Create indexes on frequently used columns to improve performance,
--- and measure query performance before and after indexing
+-- USERS TABLE INDEXES
 
--- =============================
--- Step 1: Measure query performance BEFORE indexing
--- =============================
--- Example: Query on bookings.user_id
-EXPLAIN SELECT * FROM bookings WHERE user_id = 123;
+CREATE INDEX idx_users_user_id ON users(user_id);
+CREATE INDEX idx_users_email ON users(email);
 
--- =============================
--- Step 2: Conditionally create indexes (manual check using information_schema)
--- =============================
+-- BOOKINGS TABLE INDEXES
 
--- users.user_id
-SELECT IF(
-  EXISTS (
-    SELECT 1 FROM information_schema.statistics 
-    WHERE table_schema = DATABASE() AND table_name = 'users' AND index_name = 'idx_users_user_id'
-  ),
-  'Index exists',
-  'CREATE INDEX idx_users_user_id ON users(user_id);'
-);
+CREATE INDEX idx_bookings_user_id ON bookings(user_id);
+CREATE INDEX idx_bookings_property_id ON bookings(property_id);
+CREATE INDEX idx_bookings_booking_date ON bookings(booking_date);
+CREATE INDEX idx_bookings_status ON bookings(status);
+CREATE INDEX idx_bookings_user_date ON bookings(user_id, booking_date);
 
--- bookings.user_id
-SELECT IF(
-  EXISTS (
-    SELECT 1 FROM information_schema.statistics 
-    WHERE table_schema = DATABASE() AND table_name = 'bookings' AND index_name = 'idx_bookings_user_id'
-  ),
-  'Index exists',
-  'CREATE INDEX idx_bookings_user_id ON bookings(user_id);'
-);
+-- PROPERTIES TABLE INDEXES
 
--- bookings.property_id
-SELECT IF(
-  EXISTS (
-    SELECT 1 FROM information_schema.statistics 
-    WHERE table_schema = DATABASE() AND table_name = 'bookings' AND index_name = 'idx_bookings_property_id'
-  ),
-  'Index exists',
-  'CREATE INDEX idx_bookings_property_id ON bookings(property_id);'
-);
+CREATE INDEX idx_properties_property_id ON properties(property_id);
+CREATE INDEX idx_properties_location ON properties(location);
+CREATE INDEX idx_properties_price ON properties(price_per_night);
+CREATE INDEX idx_properties_host_id ON properties(host_id);
+CREATE INDEX idx_properties_location_price ON properties(location, price_per_night);
 
--- bookings.booking_date
-SELECT IF(
-  EXISTS (
-    SELECT 1 FROM information_schema.statistics 
-    WHERE table_schema = DATABASE() AND table_name = 'bookings' AND index_name = 'idx_bookings_booking_date'
-  ),
-  'Index exists',
-  'CREATE INDEX idx_bookings_booking_date ON bookings(booking_date);'
-);
+-- PERFORMANCE MEASUREMENT EXAMPLES
 
--- properties.property_id
-SELECT IF(
-  EXISTS (
-    SELECT 1 FROM information_schema.statistics 
-    WHERE table_schema = DATABASE() AND table_name = 'properties' AND index_name = 'idx_properties_property_id'
-  ),
-  'Index exists',
-  'CREATE INDEX idx_properties_property_id ON properties(property_id);'
-);
+-- Before/after indexing
+EXPLAIN SELECT * FROM bookings WHERE user_id = 123 ORDER BY booking_date DESC;
 
--- properties.location
-SELECT IF(
-  EXISTS (
-    SELECT 1 FROM information_schema.statistics 
-    WHERE table_schema = DATABASE() AND table_name = 'properties' AND index_name = 'idx_properties_location'
-  ),
-  'Index exists',
-  'CREATE INDEX idx_properties_location ON properties(location);'
-);
-
--- =============================
--- Step 3: Measure query performance AFTER indexing
--- =============================
-EXPLAIN SELECT * FROM bookings WHERE user_id = 123;
+EXPLAIN
+SELECT u.name, p.title, b.booking_date
+FROM bookings b
+JOIN users u ON u.user_id = b.user_id
+JOIN properties p ON p.property_id = b.property_id
+WHERE b.status = 'confirmed'
+ORDER BY b.booking_date DESC;
