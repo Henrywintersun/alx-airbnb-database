@@ -102,6 +102,7 @@ RIGHT JOIN bookings ON users.user_id = bookings.user_id;
 
 
 -- LEFT JOIN: Retrieve all properties and their reviews, including properties that have no reviews.
+-- Get all properties and their reviews (if available), ordered by property_id
 SELECT 
     properties.property_id,
     properties.property_name,
@@ -110,4 +111,6 @@ SELECT
     reviews.comment
 FROM 
     properties
-LEFT JOIN reviews ON properties.property_id = reviews.property_id;
+LEFT JOIN reviews ON properties.property_id = reviews.property_id
+ORDER BY properties.property_id;
+
