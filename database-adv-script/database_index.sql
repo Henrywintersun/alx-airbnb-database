@@ -146,6 +146,13 @@ SELECT IF(
   'CREATE INDEX idx_properties_location_price ON properties(location, price_per_night);'
 ) AS idx_properties_location_price;
 
--- Performance test for properties
+-- Performance test for properties: Measuring Before and After [EXPLAIN or ANALYSE]
+EXPLAIN SELECT * FROM bookings WHERE user_id = 101 ORDER BY booking_date DESC;
 EXPLAIN
-SELECT * FROM properties WHERE location = 'Lagos' ORDER BY price_per_night;
+SELECT u.name, p.title, b.booking_date
+FROM bookings b
+JOIN users u ON u.user_id = b.user_id
+JOIN properties p ON p.property_id = b.property_id
+WHERE b.status = 'confirmed'
+ORDER BY b.booking_date DESC;
+EXPLAIN SELECT * FROM properties WHERE location = 'Lagos' ORDER BY price_per_night;
